@@ -1,0 +1,2 @@
+include ':app', ':fileloader'
+rootProject.name='MindValley'
