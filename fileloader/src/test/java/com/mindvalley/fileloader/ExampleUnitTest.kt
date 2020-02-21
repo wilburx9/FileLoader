@@ -1,4 +1,4 @@
-package com.mindvalley.fileloader
+package com.wilburt.fileloader
 
 import org.junit.Test
 
