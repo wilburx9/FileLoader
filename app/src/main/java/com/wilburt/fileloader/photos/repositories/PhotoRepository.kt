@@ -1,18 +1,12 @@
 package com.wilburt.fileloader.photos.repositories
 
 import androidx.annotation.WorkerThread
-import androidx.lifecycle.MutableLiveData
 import com.wilburt.fileloader.photos.datasource.PhotosDataSource
 import com.wilburt.fileloader.photos.models.Photo
 import com.wilburt.fileloader.photos.models.PhotosResponse
 import com.wilburt.fileloader.photos.models.Status
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import timber.log.Timber
-import java.lang.Exception
-import java.net.HttpURLConnection
-import java.net.URL
 
 
 /**
@@ -20,28 +14,24 @@ import java.net.URL
  */
 class PhotoRepository(private val dataSource: PhotosDataSource) {
 
-    val photosResponse = MutableLiveData<PhotosResponse>()
 
 
-    suspend fun fetchPhotos() {
-        withContext(Dispatchers.IO) {
-            // Notify observers that data load has started
-            photosResponse.postValue(PhotosResponse(Status.Loading))
-            try {
+    @WorkerThread
+     fun fetchPhotos(): PhotosResponse {
+        return try {
 
-                // Fetch the data
-                val jsonResponse = dataSource.getJson()
+            // Fetch the data
+            val jsonResponse = dataSource.getJson()
 
-                // Deserialize the response to a list of Photos
-                val photos = parseData(jsonResponse)
+            // Deserialize the response to a list of Photos
+            val photos = parseData(jsonResponse)
 
-                // Notify observers that the data load was successful
-                photosResponse.postValue(PhotosResponse(Status.Success, photos))
-            } catch (e: Exception) {
-                Timber.e(e)
-                // Notify observers that the data load was unsuccessful
-                photosResponse.postValue(PhotosResponse(Status.Error))
-            }
+            // Notify observers that the data load was successful
+            PhotosResponse(Status.Success, photos)
+        } catch (e: Exception) {
+            Timber.e(e)
+            // Notify observers that the data load was unsuccessful
+            PhotosResponse(Status.Error)
         }
     }
 

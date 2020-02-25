@@ -8,18 +8,30 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import com.wilburt.fileloader.R
+import com.wilburt.fileloader.common.App
 import com.wilburt.fileloader.common.crossFadeWidth
 import com.wilburt.fileloader.common.fadeOut
+import com.wilburt.fileloader.di.module.viewmodel.ViewModelFactory
 import com.wilburt.fileloader.photos.viewmodels.PhotoViewModel
 import com.wilburt.fileloader.photos.models.Status
 import kotlinx.android.synthetic.main.info_layout.*
 import kotlinx.android.synthetic.main.photo_fragment.*
 import timber.log.Timber
+import javax.inject.Inject
 
 class PhotoFragment : Fragment(), View.OnClickListener {
 
     private lateinit var viewModel: PhotoViewModel
     private var animator: Animator? = null
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        (activity!!.applicationContext as App).appComponent.inject(this)
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,7 +42,7 @@ class PhotoFragment : Fragment(), View.OnClickListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(PhotoViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(PhotoViewModel::class.java)
         setupViews()
         observeData()
     }
