@@ -2,6 +2,7 @@ package com.wilburt.fileloader.photos.repositories
 
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.MutableLiveData
+import com.wilburt.fileloader.photos.datasource.PhotosDataSource
 import com.wilburt.fileloader.photos.models.Photo
 import com.wilburt.fileloader.photos.models.PhotosResponse
 import com.wilburt.fileloader.photos.models.Status
@@ -17,7 +18,7 @@ import java.net.URL
 /**
  * Created by Wilberforce on 2020-02-21 at 17:16.
  */
-class PhotoRepository {
+class PhotoRepository(private val dataSource: PhotosDataSource) {
 
     val photosResponse = MutableLiveData<PhotosResponse>()
 
@@ -25,27 +26,21 @@ class PhotoRepository {
     suspend fun fetchPhotos() {
         withContext(Dispatchers.IO) {
             // Notify observers that data load has started
-            photosResponse.postValue(PhotosResponse(Status.loading))
+            photosResponse.postValue(PhotosResponse(Status.Loading))
             try {
 
                 // Fetch the data
-                val connection = URL(imagesUrl).openConnection() as HttpURLConnection
-                try {
-                    connection.inputStream.bufferedReader().use {
+                val jsonResponse = dataSource.getJson()
 
-                        // Deserialize the response to a list of Photos
-                        val photos = parseData(it.readText())
+                // Deserialize the response to a list of Photos
+                val photos = parseData(jsonResponse)
 
-                        // Notify observers that the data load was successful
-                        photosResponse.postValue(PhotosResponse(Status.success, photos))
-                    }
-                } finally {
-                    connection.disconnect()
-                }
+                // Notify observers that the data load was successful
+                photosResponse.postValue(PhotosResponse(Status.Success, photos))
             } catch (e: Exception) {
                 Timber.e(e)
                 // Notify observers that the data load was unsuccessful
-                photosResponse.postValue(PhotosResponse(Status.error))
+                photosResponse.postValue(PhotosResponse(Status.Error))
             }
         }
     }
@@ -75,5 +70,3 @@ class PhotoRepository {
         return photos
     }
 }
-
-private const val imagesUrl = "https://pastebin.com/raw/wgkJgazE"

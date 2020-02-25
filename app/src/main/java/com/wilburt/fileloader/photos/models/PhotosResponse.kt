@@ -6,4 +6,4 @@ package com.wilburt.fileloader.photos.models
  */
 class PhotosResponse(val status: Status, val photos: List<Photo> = emptyList())
 
-enum class Status { loading, success, error }
+enum class Status { Loading, Success, Error }

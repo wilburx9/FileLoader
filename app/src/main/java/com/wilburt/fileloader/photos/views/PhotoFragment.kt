@@ -39,7 +39,7 @@ class PhotoFragment : Fragment(), View.OnClickListener {
         viewModel.photosResponse.observeForever {
             animator?.cancel()
             when (it.status) {
-                Status.loading -> {
+                Status.Loading -> {
                     Timber.i("observeData: Loading")
                     animator = if (infoContent.visibility == View.VISIBLE) {
                         progressBar.crossFadeWidth(infoContent)
@@ -47,14 +47,14 @@ class PhotoFragment : Fragment(), View.OnClickListener {
                         progressBar.crossFadeWidth(photosRV)
                     }
                 }
-                Status.success -> {
+                Status.Success -> {
                     Timber.i("observeData: Success ${it.photos.size}")
                     (photosRV.adapter as PhotoAdapter).updateItems(it.photos)
                     animator = photosRV.crossFadeWidth(progressBar)
                     infoContent.fadeOut()
 
                 }
-                Status.error -> {
+                Status.Error -> {
                     Timber.i("observeData: Error")
                    animator = infoContent.crossFadeWidth(progressBar)
                 }
