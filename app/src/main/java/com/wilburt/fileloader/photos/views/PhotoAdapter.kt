@@ -12,17 +12,17 @@ import com.wilburt.fileloader.photos.models.Photo
 /**
  * Created by Wilberforce on 2020-02-21 at 16:56.
  */
-class PhotoAdapter(private var items: List<Photo> = emptyList()) : RecyclerView.Adapter<ListingViewHolder>() {
+class PhotoAdapter(private var items: List<Photo> = emptyList()) : RecyclerView.Adapter<PhotosViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListingViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotosViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val itemBinding = ItemPhotoBinding.inflate(inflater, parent, false)
-        return ListingViewHolder(itemBinding)
+        return PhotosViewHolder(itemBinding)
     }
 
     override fun getItemCount() = items.size
 
-    override fun onBindViewHolder(holder: ListingViewHolder, position: Int) = holder.bind(items[position])
+    override fun onBindViewHolder(holder: PhotosViewHolder, position: Int) = holder.bind(items[position])
 
     fun updateItems(items: List<Photo>) {
         val result = DiffUtil.calculateDiff(
@@ -37,7 +37,7 @@ class PhotoAdapter(private var items: List<Photo> = emptyList()) : RecyclerView.
     }
 }
 
-class ListingViewHolder(private var binding: ItemPhotoBinding) :
+class PhotosViewHolder(private var binding: ItemPhotoBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
 

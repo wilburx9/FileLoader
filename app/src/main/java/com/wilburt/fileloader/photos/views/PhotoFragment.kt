@@ -2,18 +2,20 @@ package com.wilburt.fileloader.photos.views
 
 import android.animation.Animator
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.VisibleForTesting
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.test.espresso.IdlingResource
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.wilburt.fileloader.R
-import com.wilburt.fileloader.common.App
-import com.wilburt.fileloader.common.crossFadeWidth
-import com.wilburt.fileloader.common.fadeOut
-import com.wilburt.fileloader.di.module.viewmodel.ViewModelFactory
-import com.wilburt.fileloader.photos.viewmodels.PhotoViewModel
+import com.wilburt.fileloader.common.*
+import com.wilburt.fileloader.photos.models.Photo
+import com.wilburt.fileloader.photos.models.PhotosResponse
 import com.wilburt.fileloader.photos.models.Status
+import com.wilburt.fileloader.photos.viewmodels.PhotoViewModel
 import kotlinx.android.synthetic.main.info_layout.*
 import kotlinx.android.synthetic.main.photo_fragment.*
 import timber.log.Timber
@@ -21,15 +23,15 @@ import javax.inject.Inject
 
 class PhotoFragment : Fragment(), View.OnClickListener {
 
-    private lateinit var viewModel: PhotoViewModel
+    lateinit var viewModel: PhotoViewModel
     private var animator: Animator? = null
 
     @Inject
-    lateinit var viewModelFactory: ViewModelFactory
+    lateinit var viewModelFactory: ViewModelProvider.Factory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (activity!!.applicationContext as App).appComponent.inject(this)
+        (requireActivity().applicationContext as App).appComponent.inject(this)
     }
 
 
@@ -44,10 +46,12 @@ class PhotoFragment : Fragment(), View.OnClickListener {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this, viewModelFactory).get(PhotoViewModel::class.java)
         setupViews()
-        observeData()
+       observeData()
     }
 
     private fun observeData() {
+        Timber.i("observeData: ")
+        EspressoIdlingResource.increment()
         viewModel.photosResponse.observeForever {
             animator?.cancel()
             when (it.status) {
@@ -64,16 +68,17 @@ class PhotoFragment : Fragment(), View.OnClickListener {
                     (photosRV.adapter as PhotoAdapter).updateItems(it.photos)
                     animator = photosRV.crossFadeWidth(progressBar)
                     infoContent.fadeOut()
+                    EspressoIdlingResource.decrement()
 
                 }
                 Status.Error -> {
                     Timber.i("observeData: Error")
-                   animator = infoContent.crossFadeWidth(progressBar)
+                    animator = infoContent.crossFadeWidth(progressBar)
+                    EspressoIdlingResource.decrement()
                 }
             }
 
         }
-
         viewModel.fetchPhotos()
     }
 
@@ -92,5 +97,6 @@ class PhotoFragment : Fragment(), View.OnClickListener {
         animator?.cancel()
         super.onDestroyView()
     }
+
 
 }
