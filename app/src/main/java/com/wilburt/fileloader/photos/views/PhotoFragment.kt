@@ -29,6 +29,9 @@ class PhotoFragment : Fragment(), View.OnClickListener {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
+    @Inject
+    lateinit var idlingResource : EspressoIdlingResource
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (requireActivity().applicationContext as App).appComponent.inject(this)
@@ -46,12 +49,12 @@ class PhotoFragment : Fragment(), View.OnClickListener {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this, viewModelFactory).get(PhotoViewModel::class.java)
         setupViews()
-       observeData()
+        observeData()
     }
 
     private fun observeData() {
         Timber.i("observeData: ")
-        EspressoIdlingResource.increment()
+        idlingResource.increment()
         viewModel.photosResponse.observeForever {
             animator?.cancel()
             when (it.status) {
@@ -68,13 +71,14 @@ class PhotoFragment : Fragment(), View.OnClickListener {
                     (photosRV.adapter as PhotoAdapter).updateItems(it.photos)
                     animator = photosRV.crossFadeWidth(progressBar)
                     infoContent.fadeOut()
-                    EspressoIdlingResource.decrement()
+                    Thread.sleep(2000)
+                    idlingResource.decrement()
 
                 }
                 Status.Error -> {
                     Timber.i("observeData: Error")
                     animator = infoContent.crossFadeWidth(progressBar)
-                    EspressoIdlingResource.decrement()
+                    idlingResource.decrement()
                 }
             }
 

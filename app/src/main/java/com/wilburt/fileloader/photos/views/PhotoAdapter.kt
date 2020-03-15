@@ -2,6 +2,7 @@ package com.wilburt.fileloader.photos.views
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.wilburt.fileloader.databinding.ItemPhotoBinding
@@ -41,10 +42,15 @@ class PhotosViewHolder(private var binding: ItemPhotoBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
 
+    private lateinit var model: Photo
+
     fun bind(model: Photo) {
+        this.model =model
         binding.model = model
         binding.executePendingBindings()
     }
 
+    @VisibleForTesting
+    fun getTitle() = model.photographer
 
 }
